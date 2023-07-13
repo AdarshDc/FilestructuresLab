@@ -1,139 +1,139 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<iostream.h>
-#include<fstream.h>
-#include<conio.h>
-#include<string.h>
-#include<iomanip.h>
-class student
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+class Student
 {
-public:char name[15],usn[10],age[5],sem[5],branch[15],buffer[100];
+public:
+    string name;
+    string usn;
+    string age;
+    string sem;
+    string branch;
+    string buffer;
 };
-void writerecord()
+
+void writeRecord()
 {
-fstream file;
-student s;
-int k,n;
-file.open("program_4.txt",ios::app);
-if(!file)
+    ofstream file;
+    Student s;
+    int k, n;
+    file.open("program_4.txt", ios::app);
+    if (!file)
+    {
+        cout << "\nCannot open the file in append mode\n";
+        exit(0);
+    }
+    cout << "How many records: ";
+    cin >> n;
+    for (k = 0; k < n; k++)
+    {
+        cout << "\nEnter the student name: ";
+        cin >> s.name;
+        cout << "Enter the usn: ";
+        cin >> s.usn;
+        cout << "Enter the age: ";
+        cin >> s.age;
+        cout << "Enter the sem: ";
+        cin >> s.sem;
+        cout << "Enter the branch: ";
+        cin >> s.branch;
+        file << k << "|" << s.name << "|" << s.usn << "|"
+             << s.age << "|" << s.sem << "|" << s.branch << "\n";
+    }
+    file.close();
+}
+
+void displayFile()
 {
-cout<<"\ncan not open the file in append mode\n";
-getch();
-exit(0);
+    ifstream file;
+    Student s;
+    string rrn;
+    file.open("program_4.txt");
+    if (!file)
+    {
+        cout << "\nCannot open the file in input mode\n";
+        exit(1);
+    }
+    cout << "\nRRN\tName\t\tUSN\t\tAge\t\tSem\t\tBranch\n";
+    while (getline(file, s.buffer))
+    {
+        sscanf(s.buffer.c_str(), "%[^|]|%[^|]|%[^|]|%[^|]|%[^\n]",
+               &s.name[0], &s.usn[0], &s.age[0], &s.sem[0], &s.branch[0]);
+        cout << s.buffer << endl;
+    }
+    file.close();
 }
-printf("how many records\n");
-scanf("%d",&n);
-for(k=0;k<n;k++)
-{
-cout<<"\nenter the student name: ";
-cin>>s.name;
-cout<<"\nenter the usn: ";
-cin>>s.usn;
-cout<<"\nenter the age: ";
-cin>>s.age;
-cout<<"\nenter the sem: ";
-cin>>s.sem;
-cout<<"\nenter the branch: ";
-cin>>s.branch;
-file<<k<<"|"<<s.name<<"|"<<s.usn<<"|"
-<<s.age<<"|"<<s.sem<<"|"<<s.branch<<"\n";
-}
-file.close();
-}
-void displayfile()
-{
-student s;
-char rrn[10];
-fstream file;
-file.open("program_4.txt",ios::in);
-if(!file)
-{
-cout<<"\ncannot open the file in input mode\n";
-getch();
-exit(1);
-}
-cout<<"\n";
-printf("rrn\tname\t\tusn\t\tage\t\tsem\t\tbranch\n");
-while(!file.eof())
-{
-file.getline(rrn,4,'|');
-file.getline(s.name,15,'|');
-file.getline(s.usn,15,'|');
-file.getline(s.age,5,'|');
-file.getline(s.sem,5,'|');
-file.getline(s.branch,15,'\n');
-printf("\n%s\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n",
-rrn,s.name,s.usn,s.age,s.sem,s.branch);
-}
-file.close();
-getch();
-}
+
 void search()
 {
-char rrn[10],rrn1[10][15];
-int i;
-student std[100];
-cout<<"\n enter the rrn to be searched";
-cin>>rrn;
-fstream file;
-file.open("program_4.txt",ios::in);
-if(!file)
-{
-cout<<"\n can not open the file in input mode";
-getch();
-exit(0);
+    ifstream file;
+    Student s;
+    string rrn;
+    string rrn1;
+    int i = 0;
+    Student std[100];
+    cout << "\nEnter the RRN to be searched: ";
+    cin >> rrn;
+    file.open("program_4.txt");
+    if (!file)
+    {
+        cout << "\nCannot open the file in input mode";
+        exit(0);
+    }
+    cout << "\nRRN\tName\t\tUSN\t\tAge\t\tSem\t\tBranch\n";
+    while (getline(file, s.buffer, '|'))
+    {
+        rrn1 = s.buffer;
+        getline(file, s.name, '|');
+        getline(file, s.usn, '|');
+        getline(file, s.age, '|');
+        getline(file, s.sem, '|');
+        getline(file, s.branch, '\n');
+        if (rrn == rrn1)
+        {
+            cout << rrn1 << "|" << s.name << "|" << s.usn << "|"
+                 << s.age << "|" << s.sem << "|" << s.branch << endl;
+            cout << "\nRecord found\n";
+            file.close();
+            return;
+        }
+    }
+    cout << "\nRecord not found\n";
+    file.close();
 }
-i=0;
-printf("\n rrn\tname\tusn\tage\tsem\tbranch\n");
-while(!file.eof())
+
+int main()
 {
-file.getline(rrn1[i],4,'|');
-file.getline(std[i].name,15,'|');
-file.getline(std[i].usn,15,'|');
-file.getline(std[i].age,5,'|');
-file.getline(std[i].sem,5,'|');
-file.getline(std[i].branch,15,'\n');
-i++;
-}
-for(int j=0;j<i-1;j++)
-{
-if(strcmp(rrn,rrn1[j])==0)
-{
-printf("\n%s\t%s\t%s\t%s\t%s\t%s\n",
-rrn,std[j].name,std[j].usn,std[j].age,
-std[j].sem,std[j].branch);
-printf("\n record found\n");
-file.close();
-return;
-}
-}
-cout<<"\nrecord not found\n";
-file.close();
-return;
-}
-void main()
-{
-int choice;
-clrscr();
-while(1)
-{
-cout<<"\n 0:exit";
-cout<<"\n 1:insert";
-cout<<"\n 2:search";
-cout<<"\n 3:display";
-cout<<"\n enter the choice=";
-cin>>choice;
-switch(choice)
-{
-case 1:writerecord();
-break;
-case 2:search();
-break;
-case 3:displayfile();
-break;
-case 0:exit(0);
-default:cout<<"\n invalid option";
-break;
-}
-}
+    int choice;
+    while (1)
+    {
+        cout << "\n0: Exit";
+        cout << "\n1: Insert";
+        cout << "\n2: Search";
+        cout << "\n3: Display";
+        cout << "\nEnter the choice: ";
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+            writeRecord();
+            break;
+        case 2:
+            search();
+            break;
+        case 3:
+            displayFile();
+            break;
+        case 0:
+            exit(0);
+        default:
+            cout << "\nInvalid option";
+            break;
+        }
+    }
+    return 0;
 }
