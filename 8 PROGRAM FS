@@ -1,105 +1,102 @@
-#include<stdio.h>
-#include<conio.h>
-#include<string.h>
-#include<fstream.h>
-#include<iostream.h>
-#include<stdlib.h>
-class record
-{
+#include<iostream>
+#include<string>
+#include<fstream>
+using namespace std;
+
+class coseq {
 public:
-char name[20];
-char usn[20];
-}rec[20];
-fstream file[8];
-int no;
-char fname[8][8]={"1.txt","2.txt","3.txt","4.txt","5.txt","6.txt","7.txt","8.txt"};
-void merge_file(char* file1,char* file2,char* filename)
-{
-record recd[20];
-int i,k;
-k=0;
-fstream f1,f2;
-f1.open(file1,ios::in);
-f2.open(file2,ios::in);
-while(!f1.eof())
-{
-f1.getline(recd[k].name,20,'|');
-f1.getline(recd[k++].usn,20,'\n');
-}
-while(!f2.eof())
-{
-f2.getline(recd[k].name,20,'|');
-f2.getline(recd[k++].usn,20,'\n');
-}
-int t,y;
-record temp;
-for(t=0;t<k-2;t++)
-for(y=0;y<k-t-2;y++)
-if(strcmp(recd[y].name,recd[y+1].name)>0)
-{
-temp=recd[y];
-recd[y]=recd[y+1];
-recd[y+1]=temp;
-}
-fstream temp1;
-temp1.open(filename,ios::out);
-for(t=1;t<k-1;t++)
-temp1<<recd[t].name<<"|"<<recd[t].usn<<"\n";
-f1.close();
-f2.close();
-temp1.close();
-return;
-}
-void kwaymerge()
-{
-int i,k;
-k=0;
-char 
-filename[7][20]={"11.txt","22.txt","33.txt","44.txt","111.txt","222.txt","1111.txt"};
-for(i=0;i<8;i+=2)
-{
-merge_file(fname[i],fname[i+1],filename[k++]);
-}
-k=4;
-for(i=0;i<4;i+=2)
-{
-merge_file(filename[i],filename[i+1],filename[k++]);
-}
-merge_file(filename[4],filename[5],filename[6]);
-return;
-}
-int main()
-{
-int i;
-clrscr();
-cout<<"enter no of records\n";
-cin>>no;
-cout<<"\nenter the details\n";
-for(i=0;i<8;i++)
-file[i].open(fname[i],ios::out);
-for(i=0;i<no;i++)
-{
-cout<<"Name:";
-cin>>rec[i].name;
-cout<<"Usn:";
-cin>>rec[i].usn;
-file[i%8]<<rec[i].name<<"|"<<rec[i].usn<<"\n";
-}
-for(i=0;i<8;i++)
-file[i].close();
-kwaymerge();
-fstream result;
-result.open("1111.txt",ios::in);
-cout<<"sorted records\n";
-char name[20],usn[20];
-for(i=0;i<no;i++)
-{
-result.getline(name,20,'|');
-result.getline(usn,20,'\n');
-cout<<"\nName:"<<name<<"\nUsn:"<<usn<<"\n";
-}
-getch();
-return 0;
+    string list[4][50];
+    string olist[50];
+    int c1[4], c2[4];
+
+    void readFiles();
+    void sortList(int i);
+    void mergeLists();
+};
+
+void coseq::readFiles() {
+    fstream fp;
+    string name;
+    
+    for (int i = 1; i <= 3; i++) {
+        c1[i] = 0;
+        switch (i) {
+            case 1:
+                fp.open("n1.txt", ios::in);
+                break;
+            case 2:
+                fp.open("n2.txt", ios::in);
+                break;
+            case 3:
+                fp.open("n3.txt", ios::in);
+                break;
+        }
+        
+        while (getline(fp, name)) {
+            list[i][++c1[i]] = name;
+        }
+        
+        fp.close();
+        sortList(i);
+    }
 }
 
+void coseq::sortList(int i) {
+    for (int j = 1; j <= c1[i]; j++) {
+        for (int k = j + 1; k <= c1[i]; k++) {
+            if (list[i][j] > list[i][k]) {
+                swap(list[i][j], list[i][k]);
+            }
+        }
+    }
+}
 
+void coseq::mergeLists() {
+    int avail[4] = { 0 };
+    int t = -1;
+    
+    for (int i = 1; i <= 3; i++) {
+        c2[i] = 1;
+        avail[i] = 1;
+    }
+    
+    while (true) {
+        int smallestList = 0;
+        string smallestStr;
+        
+        for (int i = 1; i <= 3; i++) {
+            if (avail[i]) {
+                if (smallestList == 0 || list[i][c2[i]] < smallestStr) {
+                    smallestList = i;
+                    smallestStr = list[i][c2[i]];
+                }
+            }
+        }
+        
+        if (smallestList == 0) {
+            break;
+        }
+        
+        c2[smallestList]++;
+        if (c2[smallestList] > c1[smallestList]) {
+            avail[smallestList] = 0;
+        }
+        
+        if (olist[t] != smallestStr) {
+            olist[++t] = smallestStr;
+        }
+    }
+    
+    cout << "\nMerged list:\n";
+    for (int i = 0; i <= t; i++) {
+        cout << olist[i] << "\n";
+    }
+}
+
+int main() {
+    coseq c;
+    c.readFiles();
+    c.mergeLists();
+
+    return 0;
+}
