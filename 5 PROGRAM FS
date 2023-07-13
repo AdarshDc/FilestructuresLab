@@ -1,232 +1,178 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<conio.h>
-#include<string.h>
-#include<fstream.h>
-#include<iostream.h>
-#include<iomanip.h>
-class record
+#include<iostream>
+#include<fstream>
+#include<string>
+using namespace std;
+int n;
+string usn_list[100];
+int addr_list[100];
+int cnt;
+class student
 {
-public: char age[5];
-char usn[20];
-char name[20];
-char sem[2];
-char branch[5];
-}rec[20];
-char st_no[5];
-int no;
-void retrieve_details()
+	public:
+		string usn,name,sem;
+		void add_rec(fstream &);
+		void get_data();
+};
+void student::get_data()
 {
-fstream file2;
-char name[20];
-char age[5];
-char usn[20];
-char sem[2];
-char branch[5];
-char ind[5];
-file2.open("record.txt",ios::in);
-for(int i=0;i<no;i++)
-{
-file2.getline(ind,5,'|');
-file2.getline(usn,20,'|');
-file2.getline(name,20,'|');
-file2.getline(age,5,'|');
-file2.getline(sem,5,'|');
-file2.getline(branch,5,'\n');
-if(strcmp(ind,st_no)==0)
-{
-cout<<"\n\t"<<"student details :\n";
-cout<<"\n\tUSN\tNAME\tAGE\tSEM\tBRANCH\n";
-cout<<"\n\t"<<usn<<"\t"<<name<<"\t";
-cout<<age<<"\t"<<sem<<"\t"<<branch<<"\n";
+	cout<<"\nUSN : ";
+	cin>>usn;
+	cout<<"\nName : ";
+	cin>>name;
+	cout<<"\nSem : ";
+	cin>>sem;
 }
-}
-file2.close();
-}
-void delete_record(char usno[])
+void create_index()
 {
-int i;
-fstream file1,file2;
-char name[20];
-char age[5];
-char usn[20];
-char sem[2];
-char branch[5];
-char ind[5];
-file2.open("record.txt",ios::in);
-for(i=0;i<no;i++)
-{
-file2.getline(ind,5,'|');
-file2.getline(usn,20,'|');
-file2.getline(name,20,'|');
-file2.getline(age,5,'|');
-file2.getline(sem,5,'|');
-file2.getline(branch,5,'\n');
-strcpy(rec[i].usn,usn);
-strcpy(rec[i].name,name);
-strcpy(rec[i].age,age);
-strcpy(rec[i].sem,sem);
-strcpy(rec[i].branch,branch);
+	void sort_index();
+	int pos;
+	string buf,urn;
+	fstream fp("inp.txt",ios::in);
+	cnt=-1;
+	while(fp)
+	{
+		pos=fp.tellg();
+		buf.erase();
+		getline(fp,buf);
+		int i=0;
+		if(buf[i]=='*')
+			continue;
+		urn.erase();
+		while(buf[i]!='|')
+			urn+=buf[i++];
+		usn_list[++cnt]=urn;
+		addr_list[cnt]=pos;
+	}
+	fp.close();
+	sort_index();
+	for(int i=0;i<cnt;i++)
+		cout<<usn_list[i]<<'|'<<addr_list[i]<<'\n';
 }
-int flag=-1;
-for(i=0;i<no;i++)
+void sort_index()
 {
-if(strcmp(rec[i].usn,usno)==0)
+	int t_addr;
+	string t_usn;
+	cout<<cnt<<'\n';
+	for(int i=0;i<cnt-1;i++)
+	{
+		for(int j=0;j<cnt-1-i;j++)
+		{
+			if(usn_list[j]>usn_list[j+1])
+			{
+				t_usn=usn_list[j];
+				usn_list[j]=usn_list[j+1];
+				usn_list[j+1]=t_usn;
+				t_addr=addr_list[j];
+				addr_list[j]=addr_list[j+1];
+				addr_list[j+1]=t_addr;
+			}
+		}
+	}
+}
+
+void student::add_rec(fstream &fp)
 {
-flag=i;
+	fp.seekp(0,ios::end);
+	fp<<usn<<'|'<<name<<'|'<<sem<<"\n";
 }
-}
-if(flag==-1)
+
+int search( string key)
 {
-cout<<"error..! \n";
-return;
+  int pos=0,adr,l=0,h=cnt,mid,flag=0;
+  string buffer;
+  fstream fp("inp.txt",ios::in);
+  while(l<=h)
+  {
+	mid=(l+h)/2;
+	if(usn_list[mid]==key)
+	{
+		flag=1;
+		break;
+	}
+     	if(usn_list[mid]>key)
+		h=mid-1;
+	if(usn_list[mid]<key)
+		l=mid+1;
+  }
+	if(flag)
+	{
+		adr=addr_list[mid];
+		fp.seekp(adr,ios::beg);
+		getline(fp,buffer);
+		cout<<"\nFond the record "<<buffer;
+		cout<<' ' <<mid<<"mid\n";
+		return mid;
+	}
+	else
+	{
+		cout<<"\nNot found";
+		return -1;
+	}
 }
-if(flag==(no-1))
+
+void del_rec(string key)
 {
-no--;
-cout<<"record deleted !\n";
-return;
-}
-for(i=flag;i<no;i++)
-{
-rec[i]=rec[i+1];
-}
-no--;
-cout<<"\nrecord deleted !\n";
-file2.close();
-file1.open("index.txt",ios::out);
-file2.open("record.txt",ios::out);
-for(i=0;i<no;i++)
-{
-file1<<rec[i].usn<<"|"<<i<<"\n";
-file2<<i<<"|"<<rec[i].usn<<"|"<<rec[i].name<<"|"<<rec[i].age
- <<"|"<<rec[i].sem<<"|"<<rec[i].branch<<"\n";
-}
-file1.close();
-file2.close();
-return;
+	int pos,adr;
+	fstream fp;
+	pos=search(key);
+	adr=addr_list[pos];
+	if(pos !=-1)
+	{
+		fp.open("inp.txt",ios::out | ios::in);
+		fp.seekp(adr,ios::beg);
+		fp.put('*');
+		cout<<"\nRecord added!";
+		fp.close();
+		for(int i=pos;i<cnt;i++)
+		{
+			usn_list[i]=usn_list[i+1];
+			addr_list[i]=addr_list[i+1];
+		}
+		cnt--;
+
+	}
+	else
+		cout<<"\n Record not found!";
 }
 int main()
 {
-fstream file1,file2;
-int choice;
-char rt_usn[20];
-char st_usn[20];
-char ind[2];
-char name[20];
-char age[2];
-char sem[5];
-char branch[5];
-int i;
-int flag;
-int flag1;
-clrscr();
-file1.open("index.txt",ios::out);
-file2.open("record.txt",ios::out);
-if(!file1 || !file2)
-{
-cout<<"file creation error ! \n";
-exit(0);
-}
-for(;;)
-{
-cout<<"\nenter the choice:\n\n";
-cout<<"1 : add record\n";
-cout<<"2 : search record\n";
-cout<<"3 : delete record\n";
-cout<<"4 : display record\n";
-cout<<"5 : exit\n\n";
-cin>>choice;
-switch(choice)
-{
-case 1: cout<<"\nenter the no. of students : ";
-cin>>no;
-cout<<"\nenter the details :\n";
-for(i=0;i<no;i++)
-{
-cout<<"\nname :";
-cin>>rec[i].name;
-cout<<"age : ";
-cin>>rec[i].age;
-cout<<"usn : ";
-cin>>rec[i].usn;
-cout<<"sem : ";
-cin>>rec[i].sem;
-cout<<"branch :";
-cin>>rec[i].branch;
-file1<<rec[i].usn<<"|"<<i<<"\n";
- file2<<i<<"|"<<rec[i].usn<<"|"<<rec[i].name
-<<"|"<<rec[i].age<<"|"<<rec[i].sem
-<<"|"<<rec[i].branch<<"\n";
-}
-file1.close();
-file2.close();
-break;
-case 2: cout<<"\nenter the USN of the student record to be 
-searched\n";
-cin>>st_usn;
-file1.open("index.txt",ios::in);
-if(!file1)
-{
-cout<<"error!\n";
-exit(0);
-}
-flag1=0;
-for(i=0;i<no;i++)
-{
-file1.getline(rt_usn,20,'|');
-file1.getline(st_no,4,'\n');
-if(strcmp(st_usn,rt_usn)==0)
-{
-retrieve_details();
-flag1=1;
-}
-}
-if(!flag1)
-{
-cout<<"\nrecord search failed !!\n";
-}
-file1.close();
-break;
-case 3: cout<<"\nenter the USN of the student record to be 
-deleted\n\n";
-cin>>st_usn;
-file1.open("index.txt",ios::in);
-if(!file1)
-{
-cout<<"error !\n";
-exit(0);
-}
-flag=0;
-for(i=0;i<no;i++)
-{
-file1.getline(rt_usn,20,'|');
-file1.getline(st_no,4,'\n');
-if(strcmp(st_usn,rt_usn)==0)
-{
-delete_record(rt_usn);
-flag=1;
-}
-}
-if(!flag)
-{
-cout<<"deletion failed!\n";
-}
-file1.close();
-break;
-case 4: cout<<"\n\tUSN\tNAME\tAGE\tSEM\tBRANCH\t\n";
-for(i=0;i<no;i++)
-{
-cout<<"\n\t"<<rec[i].usn;
-cout<<"\t"<<rec[i].name;
-cout<<"\t"<<rec[i].age;
-cout<<"\t"<<rec[i].sem;
-cout<<"\t"<<rec[i].branch<<"\n";
-}
-break;
-case 5: exit(0);
-default: cout<<"invalid choice !\n";
-break;
-}
-}
+	student s[100];
+	string key;
+	fstream fp;
+	for(;;)
+	{
+	int ch;
+		cout<<"\nenter ur choice \n1.add rec\n2. show index\n3.search\n4. delete\n5. exit";
+		cin>>ch;
+		switch(ch)
+		{
+			case 1: 
+				fp.open("inp.txt", ios::out);
+				cout<<"enter how many records\n";
+				cin>>n;
+				for(int i=0; i<n; i++)
+				{
+					s[i].get_data();
+					s[i].add_rec(fp);
+				}
+				fp.close();
+				break;
+
+			case 2: create_index();
+				break;
+
+			case 3: cout<<"enter key of record to searched\n";
+				cin>>key;
+				search(key);
+				break;
+
+			case 4: cout<<"enter key of record to deleted\n";
+				cin>>key;
+				del_rec(key);
+				break;
+
+			case 5: exit(0);
+		}
+	}
+	return 0 ;
 }
